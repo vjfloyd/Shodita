@@ -23,10 +23,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #BOT ENCARGADO DE DETECTAR CMS EN LOS      ## 
 #DOMINIOS OBTENIDOS POR SHIZUKA-BOT.PY     ##
 #############################################
-import re, time, urllib2, httplib
+#import re, time, urllib2, httplib
+import re, time
 from pymongo import MongoClient
 from bs4 import BeautifulSoup
-from urllib2 import Request, urlopen, URLError
+#from urllib2 import Request, urlopen, URLError
 
 #Colores
 class colores:
@@ -61,12 +62,12 @@ def get_html_without_subdomain(target):
 		url = "http://" + target[1] + "." + target[2]
 		html = urllib2.urlopen(url).read()
 		return html
-	except urllib2.URLError, e:
+	except urllib2.URLError as e:
 		return "False"
 
 def get_html(target):
 	url = "http://" + str(target)
-	print colores.verde + "[INFO] Generate URL: " + colores.normal + str(url)
+	print (colores.verde + "[INFO] Generate URL: " + colores.normal + str(url))
 	opener = urllib2.build_opener()
 	opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
 	html = opener.open('http://www.stackoverflow.com').read()
@@ -96,11 +97,11 @@ def detect_wp(html, dominio):
 								h1 = remove_tags(str(h1)) #PARSER
 								if h1:
 									return True
-						except urllib2.HTTPError, e:
+						except urllib2.HTTPError as e:
 							continue 
-						except urllib2.URLError, e:
+						except urllib2.URLError as e:
 							continue
-						except httplib.HTTPException, e:
+						except httplib.HTTPException as e:
 							continue
 	except:
 		return False
@@ -132,16 +133,16 @@ def insert_mongodb(cms, dominio, IP):
 		date_Insert = time.strftime("%H:%M:%S")
 		date_Update = ""
 		cursor = db.Shodita.insert({"ip":IP, "dominio":dominio, "cms":cms, "bot":"Suneo", "date_insert": date_Insert, "date_Update": date_Update})
-		print colores.azul + "[INFO] INSERT IN DB" + colores.normal
+		print (colores.azul + "[INFO] INSERT IN DB" + colores.normal)
 	except:
-		print "[WARNING]ERROR INSERT MONGODB"
+		print ("[WARNING]ERROR INSERT MONGODB")
 
 def get_target():
 	global client, db
 	cursor = db.Shodita.find({"bot":"Shizuka"})
 	for document in cursor:
 		if check_domain_mongodb(document["ip"], document["dominio"]):
-			print colores.verde + "[INFO] Domain: " + document["dominio"] + " already scanned" + colores.normal
+			print (colores.verde + "[INFO] Domain: " + document["dominio"] + " already scanned" + colores.normal)
 			pass
 		else:
 			url = "http://" + document["dominio"]
@@ -153,14 +154,14 @@ def get_target():
 					html = response.read()
 					if detect_wp(html, document["dominio"]) == True:
 						insert_mongodb("WordPress", document["dominio"], document["ip"])
-						print colores.verde + "[+][INFO] " + document["dominio"] + " is WordPress" + colores.normal
+						print (colores.verde + "[+][INFO] " + document["dominio"] + " is WordPress" + colores.normal)
 					if detect_joomla(html):
 						insert_mongodb("Joomla", document["dominio"], document["ip"])
-						print colores.verde + "[+][INFO] " + document["dominio"] + " is Joomla" + colores.normal
+						print (colores.verde + "[+][INFO] " + document["dominio"] + " is Joomla" + colores.normal)
 					if detect_drupal(html):
 						insert_mongodb("Drupal", document["dominio"], document["ip"])
-						print colores.verde + "[+][INFO] " + document["dominio"] + " is Drupal" + colores.normal
-			except URLError, e:
+						print (colores.verde + "[+][INFO] " + document["dominio"] + " is Drupal" + colores.normal)
+			except URLError as e:
 				continue
 			except httplib.BadStatusLine:
 				continue

@@ -27,9 +27,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import sys
 import os
 import threading
-import urllib2
+#import urllib2
+import urllib
 import time
-
+from urllib.request import urlopen
 #librerias selenium
 import selenium
 from selenium import webdriver
@@ -57,13 +58,13 @@ def tryConnection(IP):
     try:
         if "http" not in str(IP):
             aux = "http://"+str(IP)
-        response = urllib2.urlopen(aux,timeout=timeout)
+        response = urllib.urlopen(aux,timeout=timeout)
         if (len(response.read()) != 0) and (response.getcode() != 403) and (response.getcode() != 500) and (response.getcode() != 404):
             return True
         else:
             return False
     except Exception as e:
-        #print '[-] ERROR TRYING CONNECT: (%s) %s'%(str(IP),e)
+        print ('[-] ERROR TRYING CONNECT: (%s) %s'%(str(IP),e))
         return False
 
 def screenShot(ImageFolder,IP):
@@ -73,7 +74,7 @@ def screenShot(ImageFolder,IP):
     '''
     
 
-    print '[INFO] Trying to connect to:',str(IP)
+    #print '[INFO] Trying to connect to:',str(IP)
     IP = str(IP)
     if 'http' not in IP:
         aux = 'http://'+IP 
@@ -91,7 +92,8 @@ def screenShot(ImageFolder,IP):
         driver.save_screenshot(nombreScreenShot)
         driver.quit()
     except Exception as e:
-        print '[-] ERROR TRYING SCREENSHOT: (%s) %s'%(IP,e)
+        print ("ex"),e
+        print ('[-] ERROR TRYING SCREENSHOT: (%s) %s'%(IP,e))
 
 
 def main():
@@ -103,11 +105,11 @@ def main():
 
     # Para ver si existe el directorio y si no lo creo
     if not os.path.exists(folder):
-        print "[INFO] Creating folder for images..."
+        print ("[INFO] Creating folder for images...")
         os.makedirs(folder)
 
     if not os.path.exists(dic):
-        print "[ERROR] Dictionary with targets doesn't exist"
+        print ("[ERROR] Dictionary with targets doesn't exist")
         sys.exit(-1)
 
     line = ''
@@ -121,7 +123,7 @@ def main():
             break
         subnet = str(line)
 
-        print "[INFO] Scanning subnet: "+subnet
+        print ("[INFO] Scanning subnet: "+subnet)
         subnetTotal = float(len(IPNetwork(subnet)))
         i = 0.0
         for ip in IPNetwork(subnet):

@@ -29,14 +29,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #############################################
 
 import socket, urllib, sys, os, time, json, ssl
-import GeoIP
+#import GeoIP2
+import geoip2
 import netaddr
 from pymongo import MongoClient
-from urlparse import urlparse
+#from urlparse2 import urlparse
+import urllib.parse
 
 # Configuracion
 #portList = [21,22,23,25,53,63,80,90,110,143,161,443,500,513,520,559,3306,3389,5000,5050, 5060, 8069,8080, 9443,27017, 28017]
-portList = [80, 443, 8080, 27017]
+#portList = [80, 443, 8080, 27017,22]
+portList = [80, 443, 8080, 27017,22]
 totalPuertos = len(portList)
 ip_root = ""
 timeout = 3
@@ -48,16 +51,16 @@ def insert_mongodb(IP, Country, City, regionName, ISP, Port, Banner, Latitud, Lo
         client = MongoClient()
         db = client.test
         cursor = db.Shodita.insert({"ip":IP, "country": Country, "city": City, "region_name": regionName, "isp": ISP, "port": Port, "banner": Banner, "latitud": Latitud, "longitud": Longitud, "date_insert": date_Insert, "date_Update": date_Update, "bot":"Nobita"})
-        print "[INFO] INSERT IN DB"
+        print ("[INFO] INSERT IN DB")
     except:
-        print "[WARNING]ERROR INSERT MONGODB"
+        print ("[WARNING]ERROR INSERT MONGODB")
 
-def geoIp(IP):
+def geoIp2(IP):
 
     #return urllib.urlopen("http://ip-api.com/json/" + str(IP))
-    gi = GeoIP.open("/usr/share/GeoIP/GeoIPCity.dat", GeoIP.GEOIP_STANDARD)
+    gi = geoIp2.open("/usr/share/GeoIP2/GeoIP2City.dat", geoIp2.GeoIP2_STANDARD)
     gir = gi.record_by_addr(IP)
-    print gir
+    print (gir)
     return gir
 
 '''Grab Banner'''
@@ -95,7 +98,7 @@ def banner_grabbing_web(ip_address, port, path='/'):
             _newpath = _getlocation[_lenurlbase:]
 
             if _lastlocation != _newpath:
-                print 1
+                print (1)
                 _lastlocation = _newpath
                 banner = banner_grabbing_web(_newurl.netloc, port, _newpath)
         return banner
@@ -140,8 +143,8 @@ def banner_grabbing(ip_address, port):
         s.connect((ip_address, port))
         banner = s.recv(4096)
         pct = str(porcentaje(portList.index(port)))
-        print "[+]" + ip_address + ' : ' + str(port) + ' -BANNER- ' + banner \
-                + time.strftime("%H:%M:%S") + ' ' + pct + '%'
+        print ("[+]" + ip_address + ' : ' + str(port) + ' -BANNER- ' + banner \
+                + time.strftime("%H:%M:%S") + ' ' + pct + '%')
         return banner
     except:
         return "none"
@@ -171,13 +174,13 @@ def main():
         if is_valid_cidr(target):
             for ip_address in netaddr.IPNetwork(target):
                 ip_address = str(ip_address)
-                print "----------------------------------------"
-                print "[INFO] Connecting to: " + str(ip_address)
+                print ("----------------------------------------")
+                print ("[INFO] Connecting to: " + str(ip_address))
                 for port in portList:
                     global _lastlocation
                     _lastlocation = ''
                     pct = str(porcentaje(portList.index(port)))
-                    print "|----[!] " + str(ip_address) + " -> " + str(port) + " " + pct + "%"
+                    print ("|----[!] " + str(ip_address) + " -> " + str(port) + " " + pct + "%")
                     # Obtenemos el mensaje del servidor en el puerto
                     webport = [80, 8080, 443, 28017]
                     if port in webport:
@@ -190,16 +193,16 @@ def main():
                     if Banner == "none":
                         pass
                     else:
-                        print "[+]" + ip_address + ' : ' + str(port) + ' -BANNER- \n' + Banner + time.strftime("%H:%M:%S") + ' '
-                        # Variables obtenidas de la geoIp
-                        data_geoIP = geoIp(ip_address)
-                        if data_geoIP:
-                            Country = data_geoIP["country_name"]
-                            City = data_geoIP["city"]
-                            regionName = data_geoIP["region_name"]
-                            # ISP = data_geoIP["isp"]
-                            Latitud = data_geoIP["latitude"]
-                            Longitud = data_geoIP["longitude"]
+                        print ("[+]" + ip_address + ' : ' + str(port) + ' -BANNER- \n' + Banner + time.strftime("%H:%M:%S") + ' ')
+                        # Variables obtenidas de la GeoIP2
+                        data_GeoIP2 = GeoIP2(ip_address)
+                        if data_GeoIP2:
+                            Country = data_GeoIP2["country_name"]
+                            City = data_GeoIP2["city"]
+                            regionName = data_GeoIP2["region_name"]
+                            # ISP = data_GeoIP2["isp"]
+                            Latitud = data_GeoIP2["latitude"]
+                            Longitud = data_GeoIP2["longitude"]
                             ISP = "null"
                         else:
                             Country = City = regionName = ISP = Latitud = Longitud = "null"
@@ -208,7 +211,7 @@ def main():
                         insert_mongodb(ip_address, Country, City, regionName, ISP, port, Banner, Latitud, Longitud, date_Insert, date_Update)
                 break
             else:
-                print "[ERROR] Invalid target: " + target
+                print ("[ERROR] Invalid target: " + target)
 
 if __name__ == '__main__':
     main()

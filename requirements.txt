@@ -1,0 +1,6 @@
+selenium
+netaddr
+pymongo
+urlparse2
+geoip2==2.9.0
+paramiko

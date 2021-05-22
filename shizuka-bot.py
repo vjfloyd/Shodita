@@ -24,7 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ASOCIADOS A UNA MISMA IP CON ROBTEX       ##
 #############################################
 
-import urllib, urllib2, re, time
+#import urllib, urllib2, re, time
+import urllib, re, time
 from pymongo import MongoClient
 from bs4 import BeautifulSoup
 
@@ -52,9 +53,9 @@ def insert_mongodb(ip, dominio):
 		date_Insert = time.strftime("%H:%M:%S")
 		date_Update = ""
 		cursor = db.Shodita.insert({"ip":ip, "dominio":dominio, "date_insert": date_Insert, "date_Update": date_Update, "bot": "Shizuka"})
-		print colores.azul + "[INFO] INSERT IN DB " + dominio + colores.normal
+		print (colores.azul + "[INFO] INSERT IN DB " + dominio + colores.normal)
 	except:
-		print colores.alerta + "[WARNING] ERROR INSERT IN MONGODB" + colores.normal
+		print (colores.alerta + "[WARNING] ERROR INSERT IN MONGODB" + colores.normal)
 
 
 def check_domain_mongodb(ip, dominio):
@@ -77,10 +78,10 @@ def get_domain(target):
 			d = d.replace(" ", "")
 			d = d.replace("]","")
 			if check_domain_mongodb(target, d):
-				print "[INFO]" + str(d) + " in " + str(target) + " already insert ..."
+				print ("[INFO]" + str(d) + " in " + str(target) + " already insert ...")
 			else:
 				insert_mongodb(target, d)
-				print colores.verde + "[INFO]" + str(d) + " in " + str(target) + " insert ..." + colores.normal
+				print (colores.verde + "[INFO]" + str(d) + " in " + str(target) + " insert ..." + colores.normal)
 				
 def get_target():
 	global client, db
